@@ -2606,13 +2606,8 @@ public:
       DBUG_ENTER("thd::cleanup");
       changed_tables= 0;
       savepoints= 0;
-      /*
-        If rm_error is raised, it means that this piece of a distributed
-        transaction has failed and must be rolled back. But the user must
-        rollback it explicitly, so don't start a new distributed XA until
-        then.
-      */
-      if (!xid_state.rm_error)
+      /* xid_cache_delete() resets xid of explicitly started XA transaction */
+      if (!xid_state.is_explicit_XA())
         xid_state.xid.null();
       free_root(&mem_root,MYF(MY_KEEP_PREALLOC));
       DBUG_VOID_RETURN;

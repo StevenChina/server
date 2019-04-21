@@ -21,6 +21,7 @@ ERROR XAE04: XAER_NOTA: Unknown XID
 disconnect con2;
 connection default;
 SET debug_sync='RESET';
+XA ROLLBACK 'xatest';
 connect con1, localhost, root;
 connect con2, localhost, root;
 connection con1;
@@ -40,3 +41,4 @@ ERROR XAE04: XAER_NOTA: Unknown XID
 disconnect con2;
 connection default;
 SET debug_sync='RESET';
+XA ROLLBACK 'xatest';

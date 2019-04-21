@@ -117,6 +117,8 @@ ERROR 42000: You have an error in your SQL syntax; check the manual that corresp
 select * from t1;
 a
 20
+connection con1;
+xa rollback 'testb',0x2030405060,11;
 disconnect con1;
 connection default;
 drop table t1;

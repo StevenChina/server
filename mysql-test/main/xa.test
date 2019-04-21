@@ -64,15 +64,13 @@ start transaction;
 
 xa recover;
 
-# uncomment the line below when binlog will be able to prepare
-#disconnect con1;
+disconnect con1;
 connection default;
 
 xa prepare 'testa','testb';
 
 xa recover;
 
---error ER_XAER_NOTA
 xa commit 'testb',0x2030405060,11;
 xa rollback 'testa','testb';
 
@@ -80,7 +78,6 @@ xa rollback 'testa','testb';
 xa start 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
 
 select * from t1;
-disconnect con1;
 --source include/wait_until_count_sessions.inc
 
 connection default;

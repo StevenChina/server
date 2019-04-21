@@ -39,6 +39,7 @@ while ($i)
 
   connection default;
   SET debug_sync='RESET';
+  XA ROLLBACK 'xatest';
 
   let $op= XA ROLLBACK 'xatest';
   dec $i;

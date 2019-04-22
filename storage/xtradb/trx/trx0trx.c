@@ -333,6 +333,8 @@ trx_create(
 	trx->autoinc_locks = ib_vector_create(
 		mem_heap_create(sizeof(ib_vector_t) + sizeof(void*) * 4), 4);
 
+	trx_reset_xid_list(trx);
+
 	return(trx);
 }
 
@@ -2013,6 +2015,27 @@ trx_mark_sql_stat_end(
 	trx->last_sql_stat_start.least_undo_no = trx->undo_no;
 }
 
+/** Reset the xid list variable in transaction
+@param[in,out] trx     prepared transaction. */
+UNIV_INTERN void trx_reset_xid_list(trx_t* trx)
+{
+	trx->is_in_xid_list = FALSE;
+}
+
+/** Set the xid list variable in transaction
+@param[in,out] trx     prepared transaction. */
+UNIV_INTERN void trx_set_xid_list(trx_t* trx)
+{
+	trx->is_in_xid_list = TRUE;
+}
+
+/** Get the xid list value of transaction
+@return true if prepared transaction is in xid list. */
+UNIV_INTERN ibool trx_get_xid_list(const trx_t* trx)
+{
+	return trx->is_in_xid_list;
+}
+
 /**********************************************************************//**
 Prints info about a transaction to the given file. The caller must own the
 kernel mutex. */
@@ -2358,7 +2381,8 @@ trx_recover_for_mysql(
 	trx = UT_LIST_GET_FIRST(trx_sys->trx_list);
 
 	while (trx) {
-		if (trx->state == TRX_PREPARED) {
+		if (trx->state == TRX_PREPARED
+		    && trx_get_xid_list(trx) == FALSE) {
 			xid_list[count] = trx->xid;
 
 			if (count == 0) {
@@ -2382,12 +2406,25 @@ trx_recover_for_mysql(
 
 			count++;
 
+			trx_set_xid_list(trx);
+
 			if (count == len) {
 				break;
 			}
 		}
 
 		trx = UT_LIST_GET_NEXT(trx_list, trx);
+	}
+
+	if (trx == NULL) {
+		for (trx = UT_LIST_GET_FIRST(trx_sys->trx_list);
+		     trx != NULL;
+		     trx = UT_LIST_GET_NEXT(trx_list, trx)) {
+
+			if (trx_get_xid_list(trx) == TRUE) {
+				trx_reset_xid_list(trx);
+			}
+		}
 	}
 
 	mutex_exit(&kernel_mutex);

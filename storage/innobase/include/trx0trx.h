@@ -48,6 +48,18 @@ extern ulint	trx_n_mysql_transactions;
 the kernel mutex */
 extern ulint	trx_n_prepared;
 
+/** Reset the xid list variable in transaction
+@param[in,out]	trx	prepared transaction. */
+UNIV_INTERN void trx_reset_xid_list(trx_t* trx);
+
+/** Set the xid list variable in transaction
+@param[in,out]	trx	prepared transaction. */
+UNIV_INTERN void trx_set_xid_list(trx_t* trx);
+
+/** Get the xid list value of transaction.
+@return true if prepared transaction is in xid list. */
+UNIV_INTERN ibool trx_get_xid_list(const trx_t* trx);
+
 /********************************************************************//**
 Releases the search latch if trx has reserved it. */
 UNIV_INTERN
@@ -729,6 +741,8 @@ struct trx_struct{
 	/*------------------------------*/
 	char detailed_error[256];	/*!< detailed error message for last
 					error, or empty. */
+	/* True, if it is present in xid list. */
+	ibool	is_in_xid_list;
 };
 
 #define TRX_MAX_N_THREADS	32	/* maximum number of

@@ -48,6 +48,18 @@ extern ulint	trx_n_mysql_transactions;
 the kernel mutex */
 extern ulint	trx_n_prepared;
 
+/** Reset the xid list variable in transaction
+@param[in,out]	trx	prepared transaction. */
+UNIV_INTERN void trx_reset_xid_list(trx_t* trx);
+
+/** Set the xid list variable in transaction
+@param[in,out]	trx	prepared transaction. */
+UNIV_INTERN void trx_set_xid_list(trx_t* trx);
+
+/** Get the xid list value of transaction.
+@return true if prepared transaction is in xid list. */
+UNIV_INTERN ibool trx_get_xid_list(const trx_t* trx);
+
 /********************************************************************//**
 In XtraDB it is impossible for a transaction to own a search latch outside of
 InnoDB code, so there is nothing to release on demand.  We keep this function to
@@ -790,6 +802,8 @@ struct trx_struct{
 #define	DPAH_SIZE	8192
 	byte*		distinct_page_access_hash;
 	ibool		take_stats;
+	/* True if it is present in xid list. */
+	ibool		is_in_xid_list;
 };
 
 #define TRX_MAX_N_THREADS	32	/* maximum number of
